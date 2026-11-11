@@ -23,6 +23,32 @@ namespace GZCTF.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("GZCTF.Models.Data.AiDetectionEvent", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("ChallengeId").HasColumnType("integer");
+                    b.Property<string>("ChallengeTitle").IsRequired().HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+                    b.Property<Guid>("ContainerId").HasColumnType("uuid");
+                    b.Property<int>("GameId").HasColumnType("integer");
+                    b.Property<string>("ModelId").IsRequired().HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+                    b.Property<int>("ParticipationId").HasColumnType("integer");
+                    b.Property<DateTimeOffset>("SeenAt")
+                        .HasColumnType("timestamp with time zone");
+                    b.Property<int>("TeamId").HasColumnType("integer");
+                    b.Property<string>("TeamName").IsRequired().HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.HasKey("Id");
+                    b.HasIndex("ContainerId");
+                    b.HasIndex("GameId", "SeenAt");
+                    b.ToTable("AiDetectionEvents");
+                });
+
             modelBuilder.Entity("GZCTF.Models.Data.ApiToken", b =>
                 {
                     b.Property<Guid>("Id")
@@ -137,6 +163,9 @@ namespace GZCTF.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<Guid?>("AiDetectionToken")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("ContainerId")
                         .IsRequired()
                         .HasColumnType("text");
@@ -179,6 +208,9 @@ namespace GZCTF.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("ExerciseInstanceId")
+                        .IsUnique();
+
+                    b.HasIndex("AiDetectionToken")
                         .IsUnique();
 
                     b.HasIndex("GameInstanceId")
@@ -555,6 +587,9 @@ namespace GZCTF.Migrations
                     b.Property<bool>("DisableBloodBonus")
                         .HasColumnType("boolean");
 
+                    b.Property<bool>("EnableAiDetection")
+                        .HasColumnType("boolean");
+
                     b.Property<bool>("EnableTrafficCapture")
                         .HasColumnType("boolean");
 
@@ -808,6 +843,15 @@ namespace GZCTF.Migrations
 
             modelBuilder.Entity("GZCTF.Models.Data.Participation", b =>
                 {
+                    b.Property<int?>("AiAppealId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset?>("AiBanAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("AiBanEventId")
+                        .HasColumnType("uuid");
+
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
@@ -834,6 +878,8 @@ namespace GZCTF.Migrations
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("AiAppealId");
 
                     b.HasIndex("DivisionId");
 
@@ -1729,6 +1775,10 @@ namespace GZCTF.Migrations
 
             modelBuilder.Entity("GZCTF.Models.Data.Participation", b =>
                 {
+                    b.HasOne("GZCTF.Models.Data.LocalFile", "AiAppeal")
+                        .WithMany()
+                        .HasForeignKey("AiAppealId");
+
                     b.HasOne("GZCTF.Models.Data.Division", "Division")
                         .WithMany()
                         .HasForeignKey("DivisionId")
@@ -1749,6 +1799,8 @@ namespace GZCTF.Migrations
                     b.HasOne("GZCTF.Models.Data.LocalFile", "Writeup")
                         .WithMany()
                         .HasForeignKey("WriteupId");
+
+                    b.Navigation("AiAppeal");
 
                     b.Navigation("Division");
 
